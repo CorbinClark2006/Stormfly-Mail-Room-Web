@@ -6,6 +6,9 @@
   <meta name="theme-color" content="#214f47">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mail Room">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
   <meta name="description" content="Play Stormfly Mail Room: scan packages, find recipients, and deliver to the right locker.">
   <title>Stormfly Mail Room</title>
   <style>
@@ -25,6 +28,10 @@
     #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 10px 14px; font-size: 14px; background: #214f47; color: #fff; box-shadow: 0 2px 8px #0004; }
     #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 8px; background: #214f47; font-size: 14px; }
+    #install-help { max-width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 0; border-radius: 16px; padding: 24px; background: #faf5e8; color: #163d34; }
+    #install-help::backdrop { background: #000a; }
+    #install-help h2 { margin-top: 0; }
+    #install-help li { margin: 12px 0; line-height: 1.5; }
     [hidden] { display: none !important; }
     @media (orientation: portrait) and (hover: none) { #rotate { display: grid; } }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
@@ -49,6 +56,18 @@
     <div id="message" role="alert" hidden></div>
     <button id="fullscreen" type="button" aria-controls="game" aria-pressed="false">Full screen</button>
     <p id="fullscreen-status" role="status" hidden></p>
+    <dialog id="install-help" aria-labelledby="install-title" aria-describedby="install-description">
+      <h2 id="install-title">Play without Safari's browser bars</h2>
+      <p id="install-description">iPhone Safari cannot make this game fullscreen inside a browser tab. Install the Home Screen version instead:</p>
+      <ol>
+        <li>Open this page in <strong>Safari</strong>, then tap <strong>Share</strong> (the square with an upward arrow). Depending on your Safari layout, Share may be inside the menu.</li>
+        <li>Choose <strong>Add to Home Screen</strong>. Scroll through the actions if needed.</li>
+        <li>If shown, leave <strong>Open as Web App</strong> switched on, then tap <strong>Add</strong>.</li>
+        <li>Leave Safari and open <strong>Mail Room</strong> from your Home Screen. Turn your phone sideways and tap Play.</li>
+      </ol>
+      <p>The Home Screen version opens without Safari's address and tab bars. Internet is still required. Opening it starts a new game session.</p>
+      <form method="dialog"><button type="submit">Got it</button></form>
+    </dialog>
   </main>
   <script>
     const canvas = document.getElementById("unity-canvas");
@@ -60,17 +79,35 @@
     const game = document.getElementById("game");
     const fullscreenButton = document.getElementById("fullscreen");
     const fullscreenStatus = document.getElementById("fullscreen-status");
+    const installHelp = document.getElementById("install-help");
+    const isAppleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent)
+      || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const standaloneDisplay = matchMedia("(display-mode: standalone)");
+    const fullscreenDisplay = matchMedia("(display-mode: fullscreen)");
+    function isInstalled() {
+      return navigator.standalone === true || standaloneDisplay.matches || fullscreenDisplay.matches;
+    }
     let fullscreenNoticeTimeout;
     function syncFullscreen() {
       const active = (document.fullscreenElement || document.webkitFullscreenElement) === game;
-      fullscreenButton.textContent = active ? "Exit full screen" : "Full screen";
+      fullscreenButton.hidden = isInstalled() && !active;
+      fullscreenButton.textContent = active ? "Exit full screen" : isAppleMobile ? "Full screen on iPhone/iPad" : "Full screen";
       fullscreenButton.setAttribute("aria-pressed", String(active));
     }
     document.addEventListener("fullscreenchange", syncFullscreen);
     document.addEventListener("webkitfullscreenchange", syncFullscreen);
+    standaloneDisplay.addEventListener("change", syncFullscreen);
+    fullscreenDisplay.addEventListener("change", syncFullscreen);
+    syncFullscreen();
     fullscreenButton.onclick = async () => {
       fullscreenStatus.hidden = true;
       clearTimeout(fullscreenNoticeTimeout);
+      if (isAppleMobile && !document.fullscreenElement && !document.webkitFullscreenElement
+          && !(game.requestFullscreen && document.fullscreenEnabled)
+          && !(game.webkitRequestFullscreen && document.webkitFullscreenEnabled)) {
+        installHelp.showModal();
+        return;
+      }
       try {
         if (document.fullscreenElement || document.webkitFullscreenElement) {
           if (document.exitFullscreen) await document.exitFullscreen();
@@ -86,6 +123,11 @@
         syncFullscreen();
       } catch (error) {
         console.warn("Fullscreen request failed:", error);
+        if (isAppleMobile) {
+          installHelp.showModal();
+          syncFullscreen();
+          return;
+        }
         fullscreenStatus.textContent = error.message || "Full screen was blocked. Open the game directly in Safari or Chrome and try again.";
         fullscreenStatus.hidden = false;
         fullscreenNoticeTimeout = setTimeout(() => { fullscreenStatus.hidden = true; }, 12000);
