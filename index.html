@@ -14,10 +14,11 @@
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #162e2a; color: #faf5e8; font-family: system-ui, sans-serif; }
-    #game { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-    #stage { position: absolute; overflow: hidden; background: #162e2a; }
+    #game { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; }
+    #stage { position: absolute; inset: 0; overflow: hidden; background: #162e2a; }
     canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
     .cover { position: absolute; inset: 0; display: grid; place-content: center; place-content: safe center; overflow: auto; padding: 16px; text-align: center; background: #162e2a; z-index: 2; }
+    .cover { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
     .card { max-width: 520px; }
     #welcome .card { margin: auto; }
     h1 { margin: 0 0 12px; font-size: clamp(24px, 5vw, 42px); }
@@ -27,7 +28,7 @@
     progress { width: 100%; height: 18px; accent-color: #afdcc4; margin: 12px 0; }
     #message { position: absolute; bottom: 12px; left: 12px; right: 12px; padding: 12px; border-radius: 8px; background: #74352e; z-index: 4; }
     #rotate { display: none; z-index: 3; }
-    #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; }
     #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 10px 14px; font-size: 14px; background: #214f47; color: #fff; box-shadow: 0 2px 8px #0004; }
     #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 8px; background: #214f47; font-size: 14px; }
     #install-help { max-width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 0; border-radius: 16px; padding: 24px; background: #faf5e8; color: #163d34; }
@@ -50,7 +51,7 @@
           <p>Scan, sort, and deliver. The first level guides you through every step.</p>
           <p>Use your finger to tap and drag. On a computer, use your mouse.</p>
           <button id="play" type="button">Play</button>
-          <p id="status" role="status">Turn phones sideways. Small margins keep the entire game visible.</p>
+          <p id="status" role="status">Turn phones sideways. Launch from your Home Screen for edge-to-edge play without Safari's bars.</p>
           <progress id="progress" max="1" value="0" aria-label="Loading game" hidden></progress>
         </div>
       </section>
@@ -82,7 +83,6 @@
     const play = document.getElementById("play");
     const message = document.getElementById("message");
     const game = document.getElementById("game");
-    const stage = document.getElementById("stage");
     const fullscreenButton = document.getElementById("fullscreen");
     function fitGame() {
       const fullscreen = (document.fullscreenElement || document.webkitFullscreenElement) === game;
@@ -91,24 +91,10 @@
       game.style.height = (fullscreen || !viewport ? window.innerHeight : viewport.height) + "px";
       game.style.left = (fullscreen || !viewport ? 0 : viewport.offsetLeft) + "px";
       game.style.top = (fullscreen || !viewport ? 0 : viewport.offsetTop) + "px";
-      const style = getComputedStyle(game);
-      const left = parseFloat(style.paddingLeft) || 0;
-      const right = parseFloat(style.paddingRight) || 0;
-      const top = (parseFloat(style.paddingTop) || 0) + (fullscreenButton.hidden ? 0 : fullscreenButton.offsetHeight + 16);
-      const bottom = parseFloat(style.paddingBottom) || 0;
-      const availableWidth = Math.max(1, game.clientWidth - left - right);
-      const availableHeight = Math.max(1, game.clientHeight - top - bottom);
-      const width = Math.min(availableWidth, availableHeight * 16 / 9);
-      const height = width * 9 / 16;
-      stage.style.width = width + "px";
-      stage.style.height = height + "px";
-      stage.style.left = (left + (availableWidth - width) / 2) + "px";
-      stage.style.top = (top + (availableHeight - height) / 2) + "px";
     }
     window.addEventListener("resize", fitGame);
     window.visualViewport?.addEventListener("resize", fitGame);
     window.visualViewport?.addEventListener("scroll", fitGame);
-    new ResizeObserver(fitGame).observe(game);
     fitGame();
     const fullscreenStatus = document.getElementById("fullscreen-status");
     const installHelp = document.getElementById("install-help");
