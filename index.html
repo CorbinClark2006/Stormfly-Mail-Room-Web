@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#214f47">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="Play Stormfly Mail Room: scan packages, find recipients, and deliver to the right locker.">
   <title>Stormfly Mail Room</title>
   <style>
@@ -20,6 +22,9 @@
     progress { width: 100%; height: 18px; accent-color: #afdcc4; margin: 12px 0; }
     #message { position: absolute; bottom: 12px; left: 12px; right: 12px; padding: 12px; border-radius: 8px; background: #74352e; z-index: 4; }
     #rotate { display: none; z-index: 3; }
+    #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 10px 14px; font-size: 14px; background: #214f47; color: #fff; box-shadow: 0 2px 8px #0004; }
+    #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 8px; background: #214f47; font-size: 14px; }
     [hidden] { display: none !important; }
     @media (orientation: portrait) and (hover: none) { #rotate { display: grid; } }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
@@ -42,6 +47,8 @@
       <div class="card"><h1>Turn your phone sideways</h1><p>The mail room plays best in landscape. Rotate your phone to continue.</p></div>
     </section>
     <div id="message" role="alert" hidden></div>
+    <button id="fullscreen" type="button" aria-controls="game" aria-pressed="false">Full screen</button>
+    <p id="fullscreen-status" role="status" hidden></p>
   </main>
   <script>
     const canvas = document.getElementById("unity-canvas");
@@ -50,6 +57,41 @@
     const progress = document.getElementById("progress");
     const play = document.getElementById("play");
     const message = document.getElementById("message");
+    const game = document.getElementById("game");
+    const fullscreenButton = document.getElementById("fullscreen");
+    const fullscreenStatus = document.getElementById("fullscreen-status");
+    let fullscreenNoticeTimeout;
+    function syncFullscreen() {
+      const active = (document.fullscreenElement || document.webkitFullscreenElement) === game;
+      fullscreenButton.textContent = active ? "Exit full screen" : "Full screen";
+      fullscreenButton.setAttribute("aria-pressed", String(active));
+    }
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    document.addEventListener("webkitfullscreenchange", syncFullscreen);
+    fullscreenButton.onclick = async () => {
+      fullscreenStatus.hidden = true;
+      clearTimeout(fullscreenNoticeTimeout);
+      try {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          if (document.exitFullscreen) await document.exitFullscreen();
+          else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+          else throw new Error("Exiting fullscreen is not supported by this browser.");
+        } else if (game.requestFullscreen && document.fullscreenEnabled !== false) {
+          await game.requestFullscreen();
+        } else if (game.webkitRequestFullscreen && document.webkitFullscreenEnabled !== false) {
+          await game.webkitRequestFullscreen();
+        } else {
+          throw new Error("This browser does not support full screen for games. On iPhone, use Safari's Share menu > Add to Home Screen, then open the saved app.");
+        }
+        syncFullscreen();
+      } catch (error) {
+        console.warn("Fullscreen request failed:", error);
+        fullscreenStatus.textContent = error.message || "Full screen was blocked. Open the game directly in Safari or Chrome and try again.";
+        fullscreenStatus.hidden = false;
+        fullscreenNoticeTimeout = setTimeout(() => { fullscreenStatus.hidden = true; }, 12000);
+        syncFullscreen();
+      }
+    };
     function showMessage(text) {
       message.textContent = text;
       message.hidden = false;
