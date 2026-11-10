@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#214f47">
+  <meta name="theme-color" content="#22665e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Mail Room">
@@ -13,32 +13,42 @@
   <title>Stormfly Mail Room</title>
   <style>
     * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #162e2a; color: #faf5e8; font-family: system-ui, sans-serif; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #eff5f1; color: #203f41; font-family: system-ui, sans-serif; }
     #game { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; }
     #stage { position: absolute; inset: 0; overflow: hidden; background: #162e2a; }
     canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
-    .cover { position: absolute; inset: 0; display: grid; place-content: center; place-content: safe center; overflow: auto; padding: 16px; text-align: center; background: #162e2a; z-index: 2; }
+    .cover { position: absolute; inset: 0; display: grid; place-content: center; place-content: safe center; overflow: auto; padding: 16px; text-align: center; background: #eff5f1; z-index: 2; }
     .cover { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-    .card { max-width: 520px; }
+    .card { max-width: 560px; }
     #welcome .card { margin: auto; }
-    h1 { margin: 0 0 12px; font-size: clamp(24px, 5vw, 42px); }
-    p { line-height: 1.6; margin: 12px 0; }
-    button { border: 0; border-radius: 12px; padding: 14px 28px; background: #afdcc4; color: #163d34; font: 700 18px system-ui, sans-serif; cursor: pointer; min-height: 48px; }
+    #welcome { background: radial-gradient(ellipse at 20% 20%, #d4edde 0, transparent 55%), radial-gradient(ellipse at 90% 90%, #fae1ce 0, transparent 50%), #eff5f1; }
+    .eyebrow { color: #22665e; font-size: 12px; font-weight: 800; letter-spacing: 0.16em; }
+    .parcel { position: relative; width: 66px; height: 52px; margin: 0 auto 16px; border-radius: 14px; background: #22665e; box-shadow: 0 8px 0 #22665e12; transform: rotate(-6deg); }
+    .parcel::before { content: ""; position: absolute; width: 12px; height: 26px; top: 0; left: 27px; background: #d4edde; }
+    .parcel::after { content: ""; position: absolute; width: 22px; height: 8px; bottom: 10px; left: 10px; border-radius: 3px; background: #fcfdf8; }
+    h1 { margin: 0 0 12px; font-size: clamp(28px, 5vw, 46px); letter-spacing: -0.045em; line-height: 1.1; }
+    p { line-height: 1.6; margin: 12px 0; color: #56706f; }
+    button { border: 0; border-radius: 18px; padding: 15px 32px; background: #22665e; color: #fff; font: 700 18px system-ui, sans-serif; cursor: pointer; min-height: 48px; box-shadow: 0 4px 0 #173f3920; transition: background 120ms, transform 120ms; }
+    button:hover { background: #194f49; }
+    button:active { transform: translateY(2px); }
+    #play { min-width: 210px; margin: 8px 0; }
+    #status { font-size: 12px; max-width: 420px; margin: 12px auto 0; }
     button:focus-visible { outline: 3px solid #ffdc84; outline-offset: 4px; }
     progress { width: 100%; height: 18px; accent-color: #afdcc4; margin: 12px 0; }
-    #message { position: absolute; bottom: 12px; left: 12px; right: 12px; padding: 12px; border-radius: 8px; background: #74352e; z-index: 4; }
+    #message { position: absolute; bottom: 12px; left: 12px; right: 12px; padding: 12px; border-radius: 16px; background: #74352e; color: #fff; z-index: 4; }
     #rotate { display: none; z-index: 3; }
     #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; }
-    #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 10px 14px; font-size: 14px; background: #214f47; color: #fff; box-shadow: 0 2px 8px #0004; }
-    #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 8px; background: #214f47; font-size: 14px; }
+    #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 8px 12px; font-size: 12px; border-radius: 14px; background: #22665e; color: #fff; box-shadow: 0 2px 8px #0002; }
+    #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 16px; background: #214f47; color: #fff; font-size: 14px; }
     #install-help { max-width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 0; border-radius: 16px; padding: 24px; background: #faf5e8; color: #163d34; }
     #install-help::backdrop { background: #000a; }
     #install-help h2 { margin-top: 0; }
     #install-help li { margin: 12px 0; line-height: 1.5; }
     [hidden] { display: none !important; }
     @media (orientation: portrait) and (hover: none) { #rotate { display: grid; } }
-    @media (max-height: 430px) { #welcome h1 { font-size: 24px; margin-bottom: 6px; } #welcome p { margin: 6px 0; line-height: 1.35; font-size: 14px; } #welcome button { padding: 10px 24px; } }
-    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+    @media (max-height: 430px) { #welcome h1 { font-size: 30px; margin-bottom: 6px; } #welcome p { margin: 6px auto; line-height: 1.35; font-size: 13px; } #welcome #status { font-size: 11px; } .parcel { width: 60px; height: 46px; margin-bottom: 10px; } #welcome button { padding: 10px 24px; } }
+    @media (max-height: 330px) { .parcel { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } }
   </style>
 </head>
 <body>
@@ -47,10 +57,12 @@
       <canvas id="unity-canvas" tabindex="-1" aria-label="Stormfly Mail Room game"></canvas>
       <section id="welcome" class="cover">
         <div class="card">
+          <div class="parcel" aria-hidden="true"></div>
+          <p class="eyebrow">A LITTLE ORDER. A LOT OF GOOD DELIVERIES.</p>
           <h1>Stormfly Mail Room</h1>
-          <p>Scan, sort, and deliver. The first level guides you through every step.</p>
-          <p>Use your finger to tap and drag. On a computer, use your mouse.</p>
-          <button id="play" type="button">Play</button>
+          <p>Your desk. Your deliveries. One package at a time.</p>
+          <p>Tap and drag to play. Your first shift includes a friendly walkthrough.</p>
+          <button id="play" type="button">Start your shift</button>
           <p id="status" role="status">Turn phones sideways. Launch from your Home Screen for edge-to-edge play without Safari's bars.</p>
           <progress id="progress" max="1" value="0" aria-label="Loading game" hidden></progress>
         </div>
@@ -69,7 +81,7 @@
         <li>Open this page in <strong>Safari</strong>, then tap <strong>Share</strong> (the square with an upward arrow). Depending on your Safari layout, Share may be inside the menu.</li>
         <li>Choose <strong>Add to Home Screen</strong>. Scroll through the actions if needed.</li>
         <li>If shown, leave <strong>Open as Web App</strong> switched on, then tap <strong>Add</strong>.</li>
-        <li>Leave Safari and open <strong>Mail Room</strong> from your Home Screen. Turn your phone sideways and tap Play.</li>
+        <li>Leave Safari and open <strong>Mail Room</strong> from your Home Screen. Turn your phone sideways and tap <strong>Start your shift</strong>.</li>
       </ol>
       <p>The Home Screen version opens without Safari's address and tab bars. Internet is still required. Opening it starts a new game session.</p>
       <form method="dialog"><button type="submit">Got it</button></form>
@@ -109,7 +121,8 @@
     function syncFullscreen() {
       const active = (document.fullscreenElement || document.webkitFullscreenElement) === game;
       fullscreenButton.hidden = isInstalled() && !active;
-      fullscreenButton.textContent = active ? "Exit full screen" : isAppleMobile ? "Full screen on iPhone/iPad" : "Full screen";
+      fullscreenButton.textContent = active ? "Exit full screen" : "Full screen";
+      fullscreenButton.title = isAppleMobile ? "For edge-to-edge iPhone play, add Mail Room to your Home Screen" : "Toggle full screen";
       fullscreenButton.setAttribute("aria-pressed", String(active));
       fitGame();
     }
@@ -172,9 +185,9 @@
       status.textContent = "Loading the mail room...";
       const buildUrl = "Build";
       const config = {
-        dataUrl: buildUrl + "/Web.data.unityweb",
-        frameworkUrl: buildUrl + "/Web.framework.js.unityweb",
-        codeUrl: buildUrl + "/Web.wasm.unityweb",
+        dataUrl: buildUrl + "/03a847cd6d44731529b9e4fd295829af.data.unityweb",
+        frameworkUrl: buildUrl + "/24ac19b9004224760f10c23fcf3b17c2.framework.js.unityweb",
+        codeUrl: buildUrl + "/06ac950d3423ea3ef039d5f7290d7268.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Stormfly Interactive",
         productName: "Package Rush!",
@@ -186,7 +199,7 @@
         }
       };
       const script = document.createElement("script");
-      script.src = buildUrl + "/Web.loader.js";
+      script.src = buildUrl + "/39ad19ecde255413d73f5a650558ba89.loader.js";
       script.onerror = () => fail("Unable to download the game loader.");
       script.onload = () => {
         createUnityInstance(canvas, config, value => {
