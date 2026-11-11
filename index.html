@@ -186,9 +186,9 @@
       status.textContent = "Loading the mail room...";
       const buildUrl = "Build";
       const config = {
-        dataUrl: buildUrl + "/fbac7065ef28839d3786e8012efd63a8.data.unityweb",
-        frameworkUrl: buildUrl + "/de4b86a6480198102bf6744b23876efa.framework.js.unityweb",
-        codeUrl: buildUrl + "/dc381fd5c3f4964184e663efcb95b3e6.wasm.unityweb",
+        dataUrl: buildUrl + "/6d75549ea247542a35e788d0e981c4c9.data.unityweb",
+        frameworkUrl: buildUrl + "/700b438dba89112d019d60db632d3e51.framework.js.unityweb",
+        codeUrl: buildUrl + "/f5403d4ffc222f09d1859b61e0a7dc87.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Stormfly Interactive",
         productName: "Package Rush!",
@@ -200,7 +200,7 @@
         }
       };
       const script = document.createElement("script");
-      script.src = buildUrl + "/607dde9e3cfe945a48c40a63d55088a3.loader.js";
+      script.src = buildUrl + "/a14014d3ceca6e9ca7a3cf2da02561c9.loader.js";
       script.onerror = () => fail("Unable to download the game loader.");
       script.onload = () => {
         createUnityInstance(canvas, config, value => {
