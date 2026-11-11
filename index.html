@@ -38,7 +38,8 @@
     #message { position: absolute; bottom: 12px; left: 12px; right: 12px; padding: 12px; border-radius: 16px; background: #74352e; color: #fff; z-index: 4; }
     #rotate { display: none; z-index: 3; }
     #game:fullscreen, #game:-webkit-full-screen { width: 100%; height: 100%; background: #162e2a; }
-    #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; padding: 8px 12px; font-size: 12px; border-radius: 14px; background: #22665e; color: #fff; box-shadow: 0 2px 8px #0002; }
+    #fullscreen { position: absolute; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); z-index: 5; width: 44px; height: 44px; min-height: 44px; padding: 0; font-size: 0; border-radius: 14px; background: #22665e; color: #fff; box-shadow: 0 2px 8px #0002; }
+    #fullscreen::before { content: ""; display: block; width: 22px; height: 22px; margin: auto; background: linear-gradient(#fff, #fff) left top / 8px 2px, linear-gradient(#fff, #fff) left top / 2px 8px, linear-gradient(#fff, #fff) right top / 8px 2px, linear-gradient(#fff, #fff) right top / 2px 8px, linear-gradient(#fff, #fff) left bottom / 8px 2px, linear-gradient(#fff, #fff) left bottom / 2px 8px, linear-gradient(#fff, #fff) right bottom / 8px 2px, linear-gradient(#fff, #fff) right bottom / 2px 8px; background-repeat: no-repeat; }
     #fullscreen-status { position: absolute; top: max(64px, calc(env(safe-area-inset-top) + 56px)); right: max(8px, env(safe-area-inset-right)); max-width: min(320px, calc(100% - 16px)); z-index: 5; margin: 0; padding: 12px; border-radius: 16px; background: #214f47; color: #fff; font-size: 14px; }
     #install-help { max-width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 0; border-radius: 16px; padding: 24px; background: #faf5e8; color: #163d34; }
     #install-help::backdrop { background: #000a; }
@@ -61,7 +62,7 @@
           <p class="eyebrow">A LITTLE ORDER. A LOT OF GOOD DELIVERIES.</p>
           <h1>Stormfly Mail Room</h1>
           <p>Your desk. Your deliveries. One package at a time.</p>
-          <p>Tap and drag to play. Your first shift includes a friendly walkthrough.</p>
+          <p>Learn package deliveries and customer service, then run your own shift. Tap and drag to play.</p>
           <button id="play" type="button">Start your shift</button>
           <p id="status" role="status">Turn phones sideways. Launch from your Home Screen for edge-to-edge play without Safari's bars.</p>
           <progress id="progress" max="1" value="0" aria-label="Loading game" hidden></progress>
@@ -185,9 +186,9 @@
       status.textContent = "Loading the mail room...";
       const buildUrl = "Build";
       const config = {
-        dataUrl: buildUrl + "/03a847cd6d44731529b9e4fd295829af.data.unityweb",
-        frameworkUrl: buildUrl + "/24ac19b9004224760f10c23fcf3b17c2.framework.js.unityweb",
-        codeUrl: buildUrl + "/06ac950d3423ea3ef039d5f7290d7268.wasm.unityweb",
+        dataUrl: buildUrl + "/fbac7065ef28839d3786e8012efd63a8.data.unityweb",
+        frameworkUrl: buildUrl + "/de4b86a6480198102bf6744b23876efa.framework.js.unityweb",
+        codeUrl: buildUrl + "/dc381fd5c3f4964184e663efcb95b3e6.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Stormfly Interactive",
         productName: "Package Rush!",
@@ -199,7 +200,7 @@
         }
       };
       const script = document.createElement("script");
-      script.src = buildUrl + "/39ad19ecde255413d73f5a650558ba89.loader.js";
+      script.src = buildUrl + "/607dde9e3cfe945a48c40a63d55088a3.loader.js";
       script.onerror = () => fail("Unable to download the game loader.");
       script.onload = () => {
         createUnityInstance(canvas, config, value => {
